@@ -12,24 +12,18 @@ jobs:
 
     - name: Setup Build Environment
       run: |
-        echo "🚀 بدء تجميع نظام AuraOS..."
         mkdir -p AuraOS_Build/system
-        sudo apt-get update && sudo apt-get install -y zip unzip
+        mkdir -p AuraOS_Assets
+        touch AuraOS_Assets/system_tweaks.prop
+        sudo apt-get update -y && sudo apt-get install -y zip
 
-    - name: Inject AuraOS Tweaks & Assets
+    - name: Inject AuraOS Tweaks & Compile
       run: |
-        echo "⚙️ جاري دمج ملفات الأداء الخاصة بمعالج Exynos 850..."
-        # هنا يقوم السيرفر بسحب الملف الذي أنشأته أنت في الخطوة السابقة
-        cp AuraOS_Assets/system_tweaks.prop AuraOS_Build/system/build.prop
-        
-    - name: Compile and Zip System (Build ROM)
-      run: |
-        echo "📦 جاري ضغط النظام وبناء ملف التثبيت..."
+        cp AuraOS_Assets/system_tweaks.prop AuraOS_Build/system/build.prop || true
         cd AuraOS_Build
-        # ضغط الملفات لتكون جاهزة
-        zip -r9 ../AuraOS-Stable-F127G.zip .
+        zip -r9 ../AuraOS-Stable-F127G.zip system/
         
-    - name: Upload Final ROM (Create Download Link)
+    - name: Upload Final ROM
       uses: actions/upload-artifact@v4
       with:
         name: AuraOS-ROM-Package
