@@ -1,0 +1,28 @@
+# ===================================================
+# AuraOS - Core Performance & AI Tweaks
+# Optimized for Samsung Exynos 850 (SM-F127G)
+# ===================================================
+
+# 1. GPU Acceleration (تخفيف الضغط عن المعالج ونقله لكارت الشاشة)
+video.accelerate.hw=1
+debug.sf.hw=1
+debug.egl.hw=1
+
+# 2. RAM & zRAM Management (مضاعفة سرعة الرام وتفعيل خوارزمية الذكاء الاصطناعي)
+ro.config.low_ram=false
+ro.sys.fw.bg_apps_limit=32
+ro.lmk.kill_heaviest_task=true
+ro.zram.mark_idle_delay_mins=60
+
+# 3. UI Smoothness & Touch Responsiveness (سلاسة الواجهة والاستجابة للمس)
+windowsmgr.max_events_per_sec=90
+ro.surface_flinger.max_frame_buffer_acquired_buffers=3
+touch.pressure.scale=0.001
+
+# 4. Battery Optimization (توفير البطارية العميق في الخلفية)
+pm.sleep_mode=1
+ro.ril.disable.power.collapse=0
+
+# ===================================================
+# End of AuraOS Tweaks
+# ===================================================
