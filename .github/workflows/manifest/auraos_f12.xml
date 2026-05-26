@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+  <project name="LineageOS/android_device_samsung_m12nsxx" path="device/samsung/m12nsxx" remote="github" revision="lineage-20.0" />
+  <project name="LineageOS/android_kernel_samsung_exynos850" path="kernel/samsung/exynos850" remote="github" revision="lineage-20.0" />
+  <project name="TheMuppets/proprietary_vendor_samsung" path="vendor/samsung" remote="github" revision="lineage-20.0" />
+  
+  <project name="LineageOS/android_hardware_samsung" path="hardware/samsung" remote="github" revision="lineage-20.0" />
+</manifest>
