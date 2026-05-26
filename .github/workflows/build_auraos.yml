@@ -1,25 +1,35 @@
 name: AuraOS Cloud Build Compiler
 
 on:
-  workflow_dispatch: # زر التشغيل اليدوي
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
+    # 1. تنظيف سيرفر جيتهاب وتوفير مساحة عملاقة للتحميل (يمنع توقف السيرفر)
+    - name: Maximize Build Space
+      uses: easimon/maximize-build-space@master
+      with:
+        root-reserve-mb: 8192
+        swap-size-mb: 8192
+        remove-dotnet: 'true'
+        remove-android: 'true'
+        remove-haskell: 'true'
+        remove-codeql: 'true'
+        remove-docker-images: 'true'
+
+    # 2. تحديث أداة جلب الملفات لحل مشكلة التنبيه الأصفر
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Free Up Disk Space (تفريغ مساحة السيرفر)
-      run: |
-        sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
-        sudo apt clean
-
-    - name: Prepare Server Environment (تجهيز الأدوات)
+    # 3. تجهيز بيئة لينكس والأدوات المطلوبة
+    - name: Prepare Server Environment
       run: |
         sudo apt update
         sudo apt install -y bc bison build-essential curl flex g++-multilib gcc-multilib git gnupg gperf lib32readline-dev lib32z1-dev libelf-dev liblz4-tool libssl-dev libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev python3
 
+    # 4. تثبيت أداة Repo لسحب ملفات الأندرويد
     - name: Install Repo Tool
       run: |
         mkdir -p ~/bin
@@ -27,36 +37,17 @@ jobs:
         chmod a+x ~/bin/repo
         sudo ln -sf ~/bin/repo /usr/bin/repo
 
-    - name: Initialize & Sync Sources (تحميل الأندرويد الخام)
+    # 5. تهيئة الاتصال بمستودعات النظام
+    - name: Initialize AOSP/LineageOS Source
       run: |
         mkdir -p ~/auraos_workspace
         cd ~/auraos_workspace
         git config --global user.name "AuraOS-Developer"
         git config --global user.email "developer@auraos.local"
         repo init -u https://github.com/LineageOS/android.git -b lineage-20.0 --git-lfs --depth=1
-        
-        # دمج ملفات تعريف Samsung F12 الخاصة بك
-        mkdir -p .repo/local_manifests
-        cp $GITHUB_WORKSPACE/manifest/auraos_f12.xml .repo/local_manifests/
-        
-        # بدء التحميل السريع
+
+    # 6. بدء تحميل السورس كود الأساسي
+    - name: Sync Minimal Sources
+      run: |
+        cd ~/auraos_workspace
         repo sync -c -j$(nproc) --force-sync --no-clone-bundle --no-tags
-
-    - name: Apply AuraOS Tweaks (حقن ميزات الأداء والسرعة)
-      run: |
-        cd ~/auraos_workspace
-        chmod +x $GITHUB_WORKSPACE/auraos_tweaks.sh
-        bash $GITHUB_WORKSPACE/auraos_tweaks.sh
-
-    - name: Build AuraOS ROM (طبخ النظام)
-      run: |
-        cd ~/auraos_workspace
-        source build/envsetup.sh
-        lunch lineage_m12nsxx-userdebug
-        mka bacon -j$(nproc)
-
-    - name: Upload AuraOS ROM Zip (تصدير الملف النهائي للتحميل)
-      uses: actions/upload-artifact@v4
-      with:
-        name: AuraOS-SM-F127G-Stable
-        path: ~/auraos_workspace/out/target/product/m12nsxx/*-unofficial*.zip
